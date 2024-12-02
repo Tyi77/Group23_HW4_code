@@ -175,6 +175,8 @@ def step_123(img1_name, img2_name):
     plt.tight_layout()
     plt.show()
 
+    return F, pts1, pts2
+
 if __name__ == '__main__':
     # img1_name = './data/Statue1.bmp'
     # img2_name = './data/Statue2.bmp'
