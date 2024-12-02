@@ -24,7 +24,7 @@ def cal_P_options(E):
         np.hstack((U @ W @ V_t, t.reshape(-1, 1))),
         np.hstack((U @ W @ V_t, -t.reshape(-1, 1))),
         np.hstack((U @ W.T @ V_t, t.reshape(-1, 1))),
-        np.hstack((U @ W.T @ V_t, t.reshape(-1, 1)))
+        np.hstack((U @ W.T @ V_t, -t.reshape(-1, 1)))
     ]
 
     return P2s
@@ -46,11 +46,14 @@ def find_P2(pts1, pts2, P1, P2s):
     max_front_points = 0
     best_P2 = None
     best_3D_points = []
-
+    best_pts1 = []
+    best_pts2 = []
     for P2 in P2s:
         # calculate 3D points that are in front of the cameras
         count = 0
         cur_3D_points = []
+        cur_pts1 = []
+        cur_pts2 = []
         for pt1, pt2 in zip(pts1, pts2):
             X = triangulation(pt1, pt2, P1, P2)
 
@@ -59,15 +62,19 @@ def find_P2(pts1, pts2, P1, P2s):
             z2 = (P2 @ X)[2]
             if z1 > 0 and z2 > 0:
                 count += 1
-                cur_3D_points.append(X)
+                cur_3D_points.append(X[:3])
+                cur_pts1.append(pt1)
+                cur_pts2.append(pt2)
 
         # find the biggest count
         if count > max_front_points:
             max_front_points = count
             best_P2 = P2
             best_3D_points = cur_3D_points
+            best_pts1 = cur_pts1
+            best_pts2 = cur_pts2
     
-    return best_P2, best_3D_points
+    return best_P2, best_3D_points, best_pts1, best_pts2
 
 def read_calib(filepath):
     with open(filepath, 'r') as file:
@@ -88,8 +95,8 @@ def step45(F, pts1, pts2, K1, K2):
     P1 = np.hstack((np.eye(3), np.zeros((3, 1))))
     P2s = cal_P_options(E)
 
-    P2, points_3D = find_P2(pts1, pts2, P1, P2s)
-    return P1, P2, points_3D
+    P2, points_3D, pts1, pts2 = find_P2(pts1, pts2, P1, P2s)
+    return P1, P2, points_3D, pts1, pts2
 
 
 if __name__ == '__main__':
@@ -100,4 +107,4 @@ if __name__ == '__main__':
     F, pts1, pts2 = step_123(img1_name, img2_name, 0.0005, 10000)
     K1, K2 = read_calib(calib_filepath)
     
-    P1, P2, points_3D = step45(F, pts1, pts2, K1, K2)
+    P1, P2, points_3D, pts1, pts2 = step45(F, pts1, pts2, K1, K2)
