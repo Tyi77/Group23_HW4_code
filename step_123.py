@@ -57,8 +57,8 @@ def compute_fundamental(pts1, pts2):
     # Construct A matrix
     A = []
     for (x1, y1), (x2, y2) in zip(pts1_norm, pts2_norm):
-        # A.append([x2 * x1, x2 * y1, x2, y2 * x1, y2 * y1, y2, x1, y1, 1])
-        A.append([x1 * x2, x1 * y2, x1, y1 * x2, y1 * y2, y1, x2, y2, 1])
+        A.append([x2 * x1, x2 * y1, x2, y2 * x1, y2 * y1, y2, x1, y1, 1])
+        # A.append([x1 * x2, x1 * y2, x1, y1 * x2, y1 * y2, y1, x2, y2, 1])
     
     # Solve Af=0
     _, _, Vt = np.linalg.svd(A)
@@ -161,9 +161,9 @@ def step_123(img1_name, img2_name, fundamental_threshold, fundamental_iter):
     pts2 = np.float32([keypoints2[m[1]].pt for m in matches]).reshape(-1, 2)
 
     # Estimate the fundamental matrix and inliers
-    F, inliers = cv2.findFundamentalMat(pts1, pts2, method=cv2.FM_RANSAC)
-    inliers = inliers.reshape(-1, ).astype(bool)
-    print(F)
+    # F, inliers = cv2.findFundamentalMat(pts1, pts2, method=cv2.RANSAC)
+    # inliers = inliers.reshape(-1, ).astype(bool)
+    # print(F)
     # print(inliers)
     F, inliers = find_fundamental_matrix(pts1, pts2, threshold=fundamental_threshold, max_iters=fundamental_iter)
     print(F)
@@ -186,8 +186,8 @@ def step_123(img1_name, img2_name, fundamental_threshold, fundamental_iter):
     return F, pts1[inliers], pts2[inliers]
 
 if __name__ == '__main__':
-    img1_name = './data/Statue1.bmp'
-    img2_name = './data/Statue2.bmp'
-    # img1_name = './data/Mesona1.JPG'
-    # img2_name = './data/Mesona2.JPG'
+    # img1_name = './data/Statue1.bmp'
+    # img2_name = './data/Statue2.bmp'
+    img1_name = './data/Mesona1.JPG'
+    img2_name = './data/Mesona2.JPG'
     step_123(img1_name, img2_name, 0.01, 10000)
