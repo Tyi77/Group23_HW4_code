@@ -143,7 +143,7 @@ def draw_epilines(img1, img2, pts1, pts2, F):
 
     return img1_with_lines, img2_with_lines
 
-def step_123(img1_name, img2_name):
+def step_123(img1_name, img2_name, fundamental_threshold, fundamental_iter):
     # Load the images
     img1 = cv2.imread(img1_name)
     img2 = cv2.imread(img2_name)
@@ -159,7 +159,7 @@ def step_123(img1_name, img2_name):
     pts2 = np.float32([keypoints2[m[1]].pt for m in matches]).reshape(-1, 2)
 
     # Estimate the fundamental matrix and inliers
-    F, inliers = find_fundamental_matrix(pts1, pts2)
+    F, inliers = find_fundamental_matrix(pts1, pts2, threshold=fundamental_threshold, max_iters=fundamental_iter)
 
     # Draw epipolar lines
     img1_lines, img2_lines = draw_epilines(img1, img2, pts1[inliers], pts2[inliers], F)
@@ -174,6 +174,8 @@ def step_123(img1_name, img2_name):
     plt.title("Feature points on Image 2")
     plt.tight_layout()
     plt.show()
+
+    return F, pts1[inliers], pts2[inliers]
 
 if __name__ == '__main__':
     # img1_name = './data/Statue1.bmp'
