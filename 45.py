@@ -68,6 +68,18 @@ def find_P2(pts1, pts2, P1, P2s):
     
     return best_P2, best_3D_points
 
+def read_calib(filepath):
+    with open(filepath, 'r') as file:
+        lines = file.readlines()
+
+    k1_start = lines.index("K1:\n") + 1
+    k2_start = lines.index("K2:\n") + 1
+
+    K1 = np.array([list(map(float, line.split())) for line in lines[k1_start:k1_start + 3]])
+    K2 = np.array([list(map(float, line.split())) for line in lines[k2_start:k2_start + 3]])
+
+    return K1, K2
+
 
 def step45(F, pts1, pts2, K1, K2):
     E = cal_essential(F, K1, K2)
@@ -77,3 +89,9 @@ def step45(F, pts1, pts2, K1, K2):
 
     P2, points_3D = find_P2(pts1, pts2, P1, P2s)
     return P1, P2, points_3D
+
+if __name__ == '__main__':
+    calib_filepath = 'data/Mesona_calib.txt'
+    K1, K2 = read_calib(calib_filepath)
+    print(K1)
+    print(K2)
