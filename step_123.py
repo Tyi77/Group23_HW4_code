@@ -57,7 +57,8 @@ def compute_fundamental(pts1, pts2):
     # Construct A matrix
     A = []
     for (x1, y1), (x2, y2) in zip(pts1_norm, pts2_norm):
-        A.append([x2 * x1, x2 * y1, x2, y2 * x1, y2 * y1, y2, x1, y1, 1])
+        # A.append([x2 * x1, x2 * y1, x2, y2 * x1, y2 * y1, y2, x1, y1, 1])
+        A.append([x1 * x2, x1 * y2, x1, y1 * x2, y1 * y2, y1, x2, y2, 1])
     
     # Solve Af=0
     _, _, Vt = np.linalg.svd(A)
@@ -74,7 +75,7 @@ def compute_fundamental(pts1, pts2):
 # ==
 
 # =Use Ransac to optimize the Fundamental Matrix=
-def find_fundamental_matrix(pts1, pts2, threshold=0.0005, max_iters=10000):
+def find_fundamental_matrix(pts1, pts2, threshold=0.001, max_iters=10000):
     """Robustly estimate the fundamental matrix using RANSAC."""
     best_F = None
     best_inliers = None
@@ -130,6 +131,7 @@ def my_find_epilines(pts, from_img_idx, F):
 def draw_epilines(img1, img2, pts1, pts2, F):
     """Draw epilines on both images."""
     lines1 = my_find_epilines(pts2, 2, F)
+    # lines1 = cv2.computeCorrespondEpilines(pts2.reshape(-1, 1, 2), 2, F).reshape(-1, 3)
     img2_with_lines = img2.copy()
     img1_with_lines = img1.copy()
     w = img1.shape[1]
@@ -159,7 +161,13 @@ def step_123(img1_name, img2_name, fundamental_threshold, fundamental_iter):
     pts2 = np.float32([keypoints2[m[1]].pt for m in matches]).reshape(-1, 2)
 
     # Estimate the fundamental matrix and inliers
+    F, inliers = cv2.findFundamentalMat(pts1, pts2, method=cv2.FM_RANSAC)
+    inliers = inliers.reshape(-1, ).astype(bool)
+    print(F)
+    # print(inliers)
     F, inliers = find_fundamental_matrix(pts1, pts2, threshold=fundamental_threshold, max_iters=fundamental_iter)
+    print(F)
+    # print(inliers)
 
     # Draw epipolar lines
     img1_lines, img2_lines = draw_epilines(img1, img2, pts1[inliers], pts2[inliers], F)
@@ -178,8 +186,8 @@ def step_123(img1_name, img2_name, fundamental_threshold, fundamental_iter):
     return F, pts1[inliers], pts2[inliers]
 
 if __name__ == '__main__':
-    # img1_name = './data/Statue1.bmp'
-    # img2_name = './data/Statue2.bmp'
-    img1_name = './data/Mesona1.JPG'
-    img2_name = './data/Mesona2.JPG'
-    step_123(img1_name, img2_name)
+    img1_name = './data/Statue1.bmp'
+    img2_name = './data/Statue2.bmp'
+    # img1_name = './data/Mesona1.JPG'
+    # img2_name = './data/Mesona2.JPG'
+    step_123(img1_name, img2_name, 0.01, 10000)
