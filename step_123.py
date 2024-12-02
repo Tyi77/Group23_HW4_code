@@ -91,8 +91,8 @@ def find_fundamental_matrix(pts1, pts2, threshold=0.0005, max_iters=10000):
 
         # Compute epipolar errors for all points
         n_points = pts1.shape[0]
-        pts1_h = np.concat((pts1, np.ones((n_points, 1))), axis=1)
-        pts2_h = np.concat((pts2, np.ones((n_points, 1))), axis=1)
+        pts1_h = np.concatenate((pts1, np.ones((n_points, 1))), axis=1)
+        pts2_h = np.concatenate((pts2, np.ones((n_points, 1))), axis=1)
         errors = np.abs(np.sum(pts2_h @ F * pts1_h, axis=1))
         
         # Filter out the inliers
@@ -113,7 +113,7 @@ def find_fundamental_matrix(pts1, pts2, threshold=0.0005, max_iters=10000):
 
 # =Draw epipolar lines=
 def my_find_epilines(pts, from_img_idx, F):
-    homo_pts = np.concat((pts, np.ones((pts.shape[0], 1))), axis=1)
+    homo_pts = np.concatenate((pts, np.ones((pts.shape[0], 1))), axis=1)
     
     if from_img_idx == 1:
         lines = (F @ homo_pts.T).T

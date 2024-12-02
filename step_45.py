@@ -1,4 +1,5 @@
 import numpy as np
+from step_123 import step_123
 
 def cal_essential(F, K1, K2):
     E = K2.T @ F @ K1
@@ -23,17 +24,21 @@ def cal_P_options(E):
         np.hstack((U @ W @ V_t, t.reshape(-1, 1))),
         np.hstack((U @ W @ V_t, -t.reshape(-1, 1))),
         np.hstack((U @ W.T @ V_t, t.reshape(-1, 1))),
-        np.hstack((U @ W.T, V_t, t.reshape(-1, 1)))
+        np.hstack((U @ W.T @ V_t, t.reshape(-1, 1)))
     ]
 
     return P2s
 
 def triangulation(pt1, pt2, P1, P2):
-    A = np.array([
-        pt1[0] * P1[2] - P1[0],
-        pt1[1] * P1[2] - P1[1],
-        pt2[0] * P2[2] - P2[0],
-        pt2[1] * P2[2] - P2[1],
+    # print(pt1[0] * P1[2, :] - P1[0, :])
+    # print(pt1[1] * P1[2, :] - P1[1, :])
+    # print(pt2[0] * P2[2, :] - P2[0, :])
+    # print(pt2[1] * P2[2, :] - P2[1, :])
+    A = np.vstack([
+        pt1[0] * P1[2, :] - P1[0, :],
+        pt1[1] * P1[2, :] - P1[1, :],
+        pt2[0] * P2[2, :] - P2[0, :],
+        pt2[1] * P2[2, :] - P2[1, :],
     ])
 
     _, _, V_t = np.linalg.svd(A)
@@ -86,12 +91,18 @@ def step45(F, pts1, pts2, K1, K2):
 
     P1 = np.hstack((np.eye(3), np.zeros((3, 1))))
     P2s = cal_P_options(E)
+    print(P2s)
 
     P2, points_3D = find_P2(pts1, pts2, P1, P2s)
     return P1, P2, points_3D
 
+
 if __name__ == '__main__':
     calib_filepath = 'data/Mesona_calib.txt'
+    img1_name = 'data/Mesona1.JPG'
+    img2_name = 'data/Mesona2.JPG'
+
+    F, pts1, pts2 = step_123(img1_name, img2_name, 0.0005, 10000)
     K1, K2 = read_calib(calib_filepath)
-    print(K1)
-    print(K2)
+    
+    P1, P2, points_3D = step45(F, pts1, pts2, K1, K2)
