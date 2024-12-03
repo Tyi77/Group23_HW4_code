@@ -5,12 +5,18 @@ from step_456 import step456, read_calib
 from scipy.io import savemat
 
 if __name__ == '__main__':
-    calib_filepath = 'data/Statue_calib.txt'
-    img1_name = 'data/Statue1.bmp'
-    img2_name = 'data/Statue2.bmp'
+    # calib_filepath = 'data/Statue_calib.txt'
+    # img1_name = 'data/Statue1.bmp'
+    # img2_name = 'data/Statue2.bmp'
     # calib_filepath = 'data/Mesona_calib.txt'
     # img1_name = 'data/Mesona1.JPG'
     # img2_name = 'data/Mesona2.JPG'
+    calib_filepath = 'data/Godzilla_calib.txt'
+    img1_name = 'data/Godzilla1.jpg'
+    img2_name = 'data/Godzilla2.jpg'
+    # calib_filepath = 'data/Tokyo_Tower_calib.txt'
+    # img1_name = 'data/Tokyo_Tower1.jpg'
+    # img2_name = 'data/Tokyo_Tower2.jpg'
 
     F, pts1, pts2 = step_123(img1_name, img2_name, 0.01, 100000)
     K1, K2 = read_calib(calib_filepath)
@@ -26,5 +32,7 @@ if __name__ == '__main__':
     # show the plot
     plt.show()
 
-    savemat('output/Statue.mat', {'points_3D': points_3D, 'P1': P1, 'P2': P2, 'pts1': pts1, 'pts2': pts2})
+    # savemat('output/Statue.mat', {'points_3D': points_3D, 'P1': P1, 'P2': P2, 'pts1': pts1, 'pts2': pts2})
     # savemat('output/Mesona.mat', {'points_3D': points_3D, 'P1': P1, 'P2': P2, 'pts1': pts1, 'pts2': pts2})
+    savemat('output/Godzilla.mat', {'points_3D': points_3D, 'P1': P1, 'P2': P2, 'pts1': pts1, 'pts2': pts2})
+    # savemat('output/Tokyo_Tower.mat', {'points_3D': points_3D, 'P1': P1, 'P2': P2, 'pts1': pts1, 'pts2': pts2})
