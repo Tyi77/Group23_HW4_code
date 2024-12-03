@@ -91,7 +91,7 @@ def read_calib(filepath):
     return K1, K2
 
 
-def step45(F, pts1, pts2, K1, K2):
+def step456(F, pts1, pts2, K1, K2):
     E = cal_essential(F, K1, K2)
 
     P1 = np.hstack((np.eye(3), np.zeros((3, 1))))
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     F, pts1, pts2 = step_123(img1_name, img2_name, 0.0005, 10000)
     K1, K2 = read_calib(calib_filepath)
     
-    P1, P2, points_3D, pts1, pts2 = step45(F, pts1, pts2, K1, K2)
+    P1, P2, points_3D, pts1, pts2 = step456(F, pts1, pts2, K1, K2)
