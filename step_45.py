@@ -2,7 +2,7 @@ import numpy as np
 from step_123 import step_123
 
 def cal_essential(F, K1, K2):
-    E = K2.T @ F @ K1
+    E = K1.T @ F @ K2
     return E
 
 def cal_P_options(E):
@@ -10,9 +10,9 @@ def cal_P_options(E):
     U, _, V_t = np.linalg.svd(E)
 
     if np.linalg.det(U) < 0:
-        U *= -1
+        U[:, -1] *= -1
     if np.linalg.det(V_t) < 0:
-        V_t *= -1
+        V_t[-1, :] *= -1
 
     W = np.array([[0, -1, 0],
                   [1,  0, 0],
@@ -29,7 +29,9 @@ def cal_P_options(E):
 
     return P2s
 
-def triangulation(pt1, pt2, P1, P2):
+def triangulation(pt1, pt2, P1, P2, K1, K2):
+    P1 = K1 @ P1
+    P2 = K2 @ P2
     A = np.vstack([
         pt1[0] * P1[2, :] - P1[0, :],
         pt1[1] * P1[2, :] - P1[1, :],
@@ -42,7 +44,7 @@ def triangulation(pt1, pt2, P1, P2):
 
     return X / X[3]
 
-def find_P2(pts1, pts2, P1, P2s):
+def find_P2(pts1, pts2, P1, P2s, K1, K2):
     max_front_points = 0
     best_P2 = None
     best_3D_points = []
@@ -55,7 +57,7 @@ def find_P2(pts1, pts2, P1, P2s):
         cur_pts1 = []
         cur_pts2 = []
         for pt1, pt2 in zip(pts1, pts2):
-            X = triangulation(pt1, pt2, P1, P2)
+            X = triangulation(pt1, pt2, P1, P2, K1, K2)
 
             # the depth in two camera system
             z1 = X[2]
@@ -95,7 +97,7 @@ def step45(F, pts1, pts2, K1, K2):
     P1 = np.hstack((np.eye(3), np.zeros((3, 1))))
     P2s = cal_P_options(E)
 
-    P2, points_3D, pts1, pts2 = find_P2(pts1, pts2, P1, P2s)
+    P2, points_3D, pts1, pts2 = find_P2(pts1, pts2, P1, P2s, K1, K2)
     return P1, P2, points_3D, pts1, pts2
 
 
