@@ -10,7 +10,7 @@ def detect_and_describe(img):
     
     return keypoints, descriptors
 
-# =Feature matching by SIFT features=
+# =Feature matching by SIFT descriptors=
 def match_features(descriptors1, descriptors2, ratio=0.75):
     matches = []
     
@@ -50,7 +50,7 @@ def normalize_points(points):
 
 def compute_fundamental(pts1, pts2):
     """Compute the fundamental matrix using the normalized 8-point algorithm."""
-    # Step 1: Normalize points
+    # Normalize points
     pts1_norm, T1 = normalize_points(pts1)
     pts2_norm, T2 = normalize_points(pts2)
     
@@ -58,7 +58,6 @@ def compute_fundamental(pts1, pts2):
     A = []
     for (x1, y1), (x2, y2) in zip(pts1_norm, pts2_norm):
         A.append([x2 * x1, x2 * y1, x2, y2 * x1, y2 * y1, y2, x1, y1, 1])
-        # A.append([x1 * x2, x1 * y2, x1, y1 * x2, y1 * y2, y1, x2, y2, 1])
     
     # Solve Af=0
     _, _, Vt = np.linalg.svd(A)
@@ -123,15 +122,12 @@ def my_find_epilines(pts, from_img_idx, F):
     else:
         raise ValueError("from_img_idx must be 1 or 2")
 
-    # Normalize each line so that sqrt(a^2 + b^2) = 1
-    lines /= np.sqrt(lines[:, 0]**2 + lines[:, 1]**2).reshape(-1, 1)
-
     return lines
 
 def draw_epilines(img1, img2, pts1, pts2, F):
     """Draw epilines on both images."""
     lines1 = my_find_epilines(pts2, 2, F)
-    # lines1 = cv2.computeCorrespondEpilines(pts2.reshape(-1, 1, 2), 2, F).reshape(-1, 3)
+
     img2_with_lines = img2.copy()
     img1_with_lines = img1.copy()
     w = img1.shape[1]
@@ -140,7 +136,6 @@ def draw_epilines(img1, img2, pts1, pts2, F):
         x0, y0 = map(int, [0, -r[2] / r[1]])
         x1, y1 = map(int, [w, -(r[2] + r[0] * w) / r[1]])
         img1_with_lines = cv2.line(img1_with_lines, (x0, y0), (x1, y1), color, 1)
-        # img1_with_lines = cv2.circle(img1_with_lines, tuple(map(int, pt1)), 5, color, -1)
         img2_with_lines = cv2.circle(img2_with_lines, tuple(map(int, pt2)), 5, color, -1)
 
     return img1_with_lines, img2_with_lines
@@ -161,13 +156,8 @@ def step_123(img1_name, img2_name, fundamental_threshold, fundamental_iter):
     pts2 = np.float32([keypoints2[m[1]].pt for m in matches]).reshape(-1, 2)
 
     # Estimate the fundamental matrix and inliers
-    # F, inliers = cv2.findFundamentalMat(pts1, pts2, method=cv2.RANSAC)
-    # inliers = inliers.reshape(-1, ).astype(bool)
-    # print(F)
-    # print(inliers)
     F, inliers = find_fundamental_matrix(pts1, pts2, threshold=fundamental_threshold, max_iters=fundamental_iter)
     print(F)
-    # print(inliers)
 
     # Draw epipolar lines
     img1_lines, img2_lines = draw_epilines(img1, img2, pts1[inliers], pts2[inliers], F)
